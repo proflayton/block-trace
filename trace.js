@@ -1,7 +1,7 @@
 var net = require('net')
 var fs = require('fs')
 var socket = net.connect({
-	port: process.env.BLOCK_TRACE_PORT
+  port: process.env.BLOCK_TRACE_PORT
 })
 var interval = setInterval(ping, 500)
 ping()
