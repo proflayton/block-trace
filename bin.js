@@ -5,6 +5,7 @@ var which = require('which')
 var proc = require('child_process')
 var fs = require('fs')
 var path = require('path')
+var pathIsAbsolute = require('path-is-absolute');
 var os = require('os')
 
 var tempName = null;
@@ -27,6 +28,10 @@ function whichAndRun (args) {
   })
 }
 
+function resolvePath(p) {
+  return pathIsAbsolute(p) ? p : path.join(__dirname, p);
+}
+
 function run (args) {
   args.unshift('--debug')
 
@@ -41,7 +46,7 @@ function run (args) {
 
     var moduleIndex = 1;
     for (; moduleIndex < args.length; ++moduleIndex) {
-      if (fs.existsSync(path.resolve(__dirname, args[moduleIndex]))) {
+      if (fs.existsSync(resolvePath(args[moduleIndex]))) {
         break;
       }
     }
@@ -50,8 +55,8 @@ function run (args) {
       console.error("Misconfigured args, couldn't find module to run", args);
       return;
     }
-    var moduleToRun = args[moduleIndex]
-    tempName = path.dirname(moduleToRun) + "tmp_" + path.basename(moduleToRun);
+    var moduleToRun = resolvePath(args[moduleIndex])
+    tempName = path.join(path.dirname(moduleToRun), "tmp_" + path.basename(moduleToRun));
 
     var exists = fs.existsSync(tempName)
     if (exists) {
@@ -59,7 +64,7 @@ function run (args) {
       // (A previous block-trace process failed to cleanup somewhere?)
       fs.unlinkSync(tempName)
     }
-    var fileData = fs.readFileSync(path.join(__dirname, moduleToRun))
+    var fileData = fs.readFileSync(resolvePath(moduleToRun))
     // Append the `trace` require to the top
     fs.writeFileSync(
       tempName,

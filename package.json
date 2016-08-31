@@ -10,6 +10,7 @@
     "block-trace": "./bin.js"
   },
   "dependencies": {
+    "path-is-absolute": "^1.0.0",
     "which": "^1.2.10"
   },
   "repository": {
