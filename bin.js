@@ -39,22 +39,26 @@ function run (args) {
     process.env.BLOCK_TRACE_PORT = '' + server.address().port
     process.env.BLOCK_TRACE_FILE = path.join(os.tmpDir(), 'block-trace-' + server.address().port)
 
-    var moduleToRun = args[1];
-    tempName = "tmp_" + moduleToRun;
+    var moduleToRun = args[args.length - 1]
+    tempName = "tmp_" + moduleToRun
 
-    var exists = fs.existsSync(path.join(__dirname, tempName));
+    var exists = fs.existsSync(path.join(__dirname, tempName))
     if (exists) {
-      fs.unlinkSync(path.join(__dirname, tempName));
+      // Remove this temp file if it already exists
+      // (A previous block-trace process failed to cleanup somewhere?)
+      fs.unlinkSync(path.join(__dirname, tempName))
     }
-    var fileData = fs.readFileSync(path.join(__dirname, moduleToRun));
+    var fileData = fs.readFileSync(path.join(__dirname, moduleToRun))
+    // Append the `trace` require to the top
     fs.writeFileSync(
       path.join(__dirname, tempName),
       "require('" + require.resolve('./trace.js') + "');\n" + fileData,
       {
         flags: 'w'
       }
-    );
-    args[1] = tempName;
+    )
+    // Now we actually want to run our awesome hacked-together module
+    args[args.length - 1] = tempName
 
     child = proc.spawn(process.execPath, args, {
       stdio: [process.stdin, process.stdout, null]
@@ -85,17 +89,22 @@ function ontimeout () {
   if (!child) return
   tracing = true
   debug = proc.spawn(process.execPath, ['debug', 'localhost:5858'])
-  debug.stdout.once('data', _checkData)
+
   function _checkData(data) {
     if (data.toString().indexOf("ok") !== -1) {
       setImmediate(_write)
     } else {
-      debug.stdout.once('data', _checkData)
+      _listenForOk()
     }
   }
-  function _write() {
-    debug.stdin.write('repl\nWRITE_BLOCK_TRACE_FILE()\n');
+  function _listenForOk() {
+    debug.stdout.once('data', _checkData)
   }
+  function _write() {
+    debug.stdin.write('repl\nWRITE_BLOCK_TRACE_FILE()\n')
+  }
+
+  _listenForOk()
   debug.on('exit', cleanup)
 }
 
@@ -103,9 +112,9 @@ function cleanup () {
   if (child) child.kill()
   if (debug) debug.kill()
   if (tempName) {
-    var exists = fs.existsSync(path.join(__dirname, tempName));
+    var exists = fs.existsSync(path.join(__dirname, tempName))
     if (exists) {
-      fs.unlinkSync(path.join(__dirname, tempName));
+      fs.unlinkSync(path.join(__dirname, tempName))
     }
   }
 
@@ -117,7 +126,7 @@ function cleanup () {
   } catch (err) {
     return
   }
-
+  // Trim off the top 3 which will be added due to our invasive maneuvers
   stack = 'Error: CPU is blocked\n' + stack.trim().split('\n').slice(3).join('\n')
   console.error(stack)
   process.exit(1)

@@ -37,6 +37,18 @@ Error: CPU is blocked
     at Timer.listOnTimeout (timers.js:92:15)
 ```
 
+### Stack Trace Size
+
+You control the stack trace size by providing a stack-trace-limit option. This is actually handled by Node itself.
+Example:
+```
+--stack-trace-limit=50
+```
+
+## Assumptions
+
+Currently, `block-trace` is designed in such a manner that we assume the LAST arg in your command is your module (block-trace node example.js <<< example.js). This is to provide compatability with node v0.10.x.
+
 ## License
 
 MIT

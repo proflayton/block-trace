@@ -1,4 +1,3 @@
-var stackTrace = require('stack-trace')
 var net = require('net')
 var fs = require('fs')
 var socket = net.connect({
@@ -13,12 +12,7 @@ function ping () {
   socket.write('ping\n')
 }
 
-global.WRITE_BLOCK_TRACE_FILE = function () {
-  var stack = stackTrace.parse(new Error());
-  var string = "";
-  for (var s in stack) {
-  	string += JSON.stringify(stack[s]) + "\n"
-  }
-  fs.writeFileSync(process.env.BLOCK_TRACE_FILE, string, 'utf8');
-  process.exit(1);
+global.WRITE_BLOCK_TRACE_FILE = function WRITE_BLOCK_TRACE_FILE() {
+  fs.writeFileSync(process.env.BLOCK_TRACE_FILE, new Error().stack.toString(), 'utf8')
+  process.exit(1)
 }
