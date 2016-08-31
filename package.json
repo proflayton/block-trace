@@ -3,17 +3,15 @@
   "version": "1.0.1",
   "description": "Figure out if your node process is blocked because the CPU is spinning and exit the program with a stack trace if that is the case",
   "main": "index.js",
+  "scripts": {
+    "run_test": "./bin.js node example.js"
+  },
   "bin": {
     "block-trace": "./bin.js"
   },
   "dependencies": {
+    "stack-trace": "0.0.9",
     "which": "^1.2.10"
-  },
-  "devDependencies": {
-    "standard": "^8.0.0"
-  },
-  "scripts": {
-    "test": "standard"
   },
   "repository": {
     "type": "git",
