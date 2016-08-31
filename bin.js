@@ -41,7 +41,7 @@ function run (args) {
 
     var moduleIndex = 1;
     for (; moduleIndex < args.length; ++moduleIndex) {
-      if (fs.existsSync(path.join(__dirname, args[moduleIndex]))) {
+      if (fs.existsSync(path.resolve(__dirname, args[moduleIndex]))) {
         break;
       }
     }
@@ -51,18 +51,18 @@ function run (args) {
       return;
     }
     var moduleToRun = args[moduleIndex]
-    tempName = "tmp_" + moduleToRun
+    tempName = path.dirname(moduleToRun) + "tmp_" + path.basename(moduleToRun);
 
-    var exists = fs.existsSync(path.join(__dirname, tempName))
+    var exists = fs.existsSync(tempName)
     if (exists) {
       // Remove this temp file if it already exists
       // (A previous block-trace process failed to cleanup somewhere?)
-      fs.unlinkSync(path.join(__dirname, tempName))
+      fs.unlinkSync(tempName)
     }
     var fileData = fs.readFileSync(path.join(__dirname, moduleToRun))
     // Append the `trace` require to the top
     fs.writeFileSync(
-      path.join(__dirname, tempName),
+      tempName,
       "require('" + require.resolve('./trace.js') + "');\n" + fileData,
       {
         flags: 'w'
@@ -123,9 +123,9 @@ function cleanup () {
   if (child) child.kill()
   if (debug) debug.kill()
   if (tempName) {
-    var exists = fs.existsSync(path.join(__dirname, tempName))
+    var exists = fs.existsSync(tempName)
     if (exists) {
-      fs.unlinkSync(path.join(__dirname, tempName))
+      fs.unlinkSync(tempName)
     }
   }
 
