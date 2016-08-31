@@ -39,7 +39,18 @@ function run (args) {
     process.env.BLOCK_TRACE_PORT = '' + server.address().port
     process.env.BLOCK_TRACE_FILE = path.join(os.tmpDir(), 'block-trace-' + server.address().port)
 
-    var moduleToRun = args[args.length - 1]
+    var moduleIndex = 1;
+    for (; moduleIndex < args.length; ++moduleIndex) {
+      if (fs.existsSync(path.join(__dirname, args[moduleIndex]))) {
+        break;
+      }
+    }
+    if (moduleIndex === args.length) {
+      // Sad face. Bad cmd
+      console.error("Misconfigured args, couldn't find module to run", args);
+      return;
+    }
+    var moduleToRun = args[moduleIndex]
     tempName = "tmp_" + moduleToRun
 
     var exists = fs.existsSync(path.join(__dirname, tempName))
@@ -58,7 +69,7 @@ function run (args) {
       }
     )
     // Now we actually want to run our awesome hacked-together module
-    args[args.length - 1] = tempName
+    args[moduleIndex] = tempName
 
     child = proc.spawn(process.execPath, args, {
       stdio: [process.stdin, process.stdout, null]

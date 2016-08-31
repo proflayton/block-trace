@@ -45,10 +45,6 @@ Example:
 --stack-trace-limit=50
 ```
 
-## Assumptions
-
-Currently, `block-trace` is designed in such a manner that we assume the LAST arg in your command is your module (block-trace node example.js <<< example.js). This is to provide compatability with node v0.10.x.
-
 ## License
 
 MIT
