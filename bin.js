@@ -64,11 +64,28 @@ function run (args) {
       // (A previous block-trace process failed to cleanup somewhere?)
       fs.unlinkSync(tempName)
     }
-    var fileData = fs.readFileSync(resolvePath(moduleToRun))
+    var fileData = fs.readFileSync(resolvePath(moduleToRun)).toString()
+    var lineCharAt = 0;
+    for (; lineCharAt < fileData.length; ++lineCharAt) {
+      if (fileData[lineCharAt] === '#') {
+        lineCharAt = fileData.indexOf("\n", lineCharAt + 1)
+        if (lineCharAt === -1) {
+          lineCharAt = fileData.length - 1;
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+    var newData = (
+      fileData.substr(0, lineCharAt) +
+      "require('" + require.resolve('./trace.js') + "');\n" +
+      fileData.substr(lineCharAt)
+    )
     // Append the `trace` require to the top
     fs.writeFileSync(
       tempName,
-      "require('" + require.resolve('./trace.js') + "');\n" + fileData,
+      newData,
       {
         flags: 'w'
       }

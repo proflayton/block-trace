@@ -1,3 +1,6 @@
+#!/usr/bin/env node
+'use strict';
+
 console.log('Waiting 1s ...')
 
 // Want to do some recursion to make the stack more of an actual thing
